@@ -310,6 +310,20 @@
 
     document.getElementById('title').addEventListener('click', renderMapCards);
 
+    document.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('modal');
+      if (!modal.classList.contains('active') || !player) return;
+
+      const SEEK_AMOUNT = 5;
+      if (e.key === 'ArrowLeft') {
+        player.currentTime = Math.max(player.currentTime - SEEK_AMOUNT, 0);
+        e.preventDefault();
+      } else if (e.key === 'ArrowRight') {
+        player.currentTime = Math.min(player.currentTime + SEEK_AMOUNT, player.duration || player.currentTime + SEEK_AMOUNT);
+        e.preventDefault();
+      }
+    });
+
     loadManifest().catch(err => {
       document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
     });

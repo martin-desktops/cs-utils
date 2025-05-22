@@ -64,7 +64,6 @@
       height: 300px;
     }
 
-
     .card-title {
       font-weight: bold;
       font-size: 0.9rem;
@@ -312,11 +311,22 @@
       if (!modal.classList.contains('active') || !player) return;
 
       const SEEK_AMOUNT = 5;
+
       if (e.key === 'ArrowLeft') {
         player.currentTime = Math.max(player.currentTime - SEEK_AMOUNT, 0);
         e.preventDefault();
       } else if (e.key === 'ArrowRight') {
         player.currentTime = Math.min(player.currentTime + SEEK_AMOUNT, player.duration || player.currentTime + SEEK_AMOUNT);
+        e.preventDefault();
+      } else if (e.key === 'f' || e.key === 'F') {
+        const videoContainer = document.getElementById('modalVideo').parentElement;
+
+        if (!document.fullscreenElement) {
+          videoContainer.requestFullscreen?.().catch(console.error);
+        } else {
+          document.exitFullscreen?.().catch(console.error);
+        }
+
         e.preventDefault();
       }
     });

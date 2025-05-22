@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>CS2 Utility Browser</title>
+  <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
     body {
       font-family: sans-serif;
@@ -57,7 +58,7 @@
       z-index: 999;
     }
 
-    .modal video {
+    .modal .plyr {
       width: 80%;
       max-height: 80%;
       background: black;
@@ -86,10 +87,13 @@
 
   <div id="modal" class="modal" style="display:none;">
     <button class="modal-close" onclick="closeModal()">Close</button>
-    <video id="modalVideo" controls></video>
+    <video id="modalVideo" class="plyr" controls></video>
   </div>
 
+  <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
+    let player;
+
     async function loadManifest() {
       const res = await fetch('manifest.json');
       return res.json();
@@ -143,23 +147,31 @@
     function openModal(src) {
       const modal = document.getElementById('modal');
       const video = document.getElementById('modalVideo');
-      video.src = src;
-      video.play();
+
+      if (player) {
+        player.source = {
+          type: 'video',
+          sources: [{ src, type: 'video/mp4' }]
+        };
+      } else {
+        player = new Plyr(video, { autoplay: true });
+        player.source = {
+          type: 'video',
+          sources: [{ src, type: 'video/mp4' }]
+        };
+      }
+
       modal.style.display = 'flex';
     }
 
     function closeModal() {
       const modal = document.getElementById('modal');
-      const video = document.getElementById('modalVideo');
-      video.pause();
-      video.src = '';
+      if (player) player.stop();
       modal.style.display = 'none';
     }
 
     loadManifest()
-      .then(manifest => {
-        populateMapDropdown(manifest);
-      })
+      .then(manifest => populateMapDropdown(manifest))
       .catch(err => {
         document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
       });

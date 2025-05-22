@@ -211,30 +211,14 @@
         const spinner = document.createElement('div');
         spinner.className = 'spinner';
 
-        const files = manifestData[map];
-        const randomFile = files[Math.floor(Math.random() * files.length)];
-
-        const thumb = document.createElement('video');
-        thumb.src = `${map}/${randomFile}`;
-        thumb.className = 'thumb';
-        thumb.muted = true;
-        thumb.loop = true;
-        thumb.playsInline = true;
-        thumb.autoplay = false;
-        thumb.controls = false;
-
-        thumb.addEventListener('mouseenter', () => thumb.play().catch(() => {}));
-        thumb.addEventListener('mouseleave', () => {
-          thumb.pause();
-          thumb.currentTime = 0;
-        });
-
-        thumb.addEventListener('loadeddata', () => {
-          spinner.remove();
-        });
+        const img = document.createElement('img');
+        const mapSlug = map.toLowerCase().replaceAll(' ', '_');
+        img.src = `https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/main/cs/${mapSlug}.png`;
+        img.className = 'thumb';
+        img.onload = () => spinner.remove();
 
         thumbContainer.appendChild(spinner);
-        thumbContainer.appendChild(thumb);
+        thumbContainer.appendChild(img);
 
         card.appendChild(title);
         card.appendChild(thumbContainer);

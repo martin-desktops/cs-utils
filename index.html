@@ -20,49 +20,13 @@
     }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
     }
-    .thumb {
-      cursor: pointer;
-      background: #222;
-      border: 1px solid #333;
-      padding: 0.5rem;
-      border-radius: 4px;
-      text-align: center;
-      transition: transform 0.1s ease;
-    }
-    .thumb:hover {
-      transform: scale(1.03);
-    }
-    .thumb img {
+    video {
       width: 100%;
-      aspect-ratio: 16 / 9;
-      object-fit: cover;
-      border-radius: 4px;
+      border: 1px solid #333;
       background: black;
-    }
-    .title {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-      color: #ccc;
-    }
-    /* Modal styles */
-    .modal {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.8);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    .modal video {
-      max-width: 90%;
-      max-height: 90%;
-    }
-    .modal.active {
-      display: flex;
     }
   </style>
 </head>
@@ -74,10 +38,6 @@
   </select>
 
   <div id="videoGrid" class="grid"></div>
-
-  <div class="modal" id="videoModal" onclick="closeModal()">
-    <video id="modalVideo" controls autoplay></video>
-  </div>
 
   <script>
     async function loadManifest() {
@@ -100,53 +60,24 @@
       });
     }
 
-    function formatTitle(filename) {
-      return filename
-        .replace(/\.[^/.]+$/, '') // remove extension
-        .replace(/[_\-]/g, ' ')
-        .replace(/\b\w/g, c => c.toUpperCase());
-    }
-
     function renderVideos(manifest, map) {
       const grid = document.getElementById('videoGrid');
       grid.innerHTML = '';
       if (!map || !manifest[map]) return;
 
       for (const file of manifest[map]) {
-        const thumb = document.createElement('div');
-        thumb.className = 'thumb';
-
-        const img = document.createElement('img');
-        img.src = `${map}/${file}#t=0.1`; // fake preview using video as image
-
-        const title = document.createElement('div');
-        title.className = 'title';
-        title.textContent = formatTitle(file);
-
-        thumb.appendChild(img);
-        thumb.appendChild(title);
-        thumb.addEventListener('click', () => openModal(`${map}/${file}`));
-        grid.appendChild(thumb);
+        const vid = document.createElement('video');
+        vid.src = `${map}/${file}`;
+        vid.controls = true;
+        vid.autoplay = false;
+        grid.appendChild(vid);
       }
     }
 
-    function openModal(src) {
-      const modal = document.getElementById('videoModal');
-      const video = document.getElementById('modalVideo');
-      video.src = src;
-      modal.classList.add('active');
-    }
-
-    function closeModal() {
-      const modal = document.getElementById('videoModal');
-      const video = document.getElementById('modalVideo');
-      video.pause();
-      video.src = '';
-      modal.classList.remove('active');
-    }
-
     loadManifest()
-      .then(manifest => populateMapDropdown(manifest))
+      .then(manifest => {
+        populateMapDropdown(manifest);
+      })
       .catch(err => {
         document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
       });

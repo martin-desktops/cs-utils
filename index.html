@@ -134,12 +134,16 @@
         thumb.muted = true;
         thumb.loop = true;
         thumb.playsInline = true;
-        thumb.autoplay = true;
         thumb.controls = false;
 
         thumb.addEventListener('click', () => openModal(`${map}/${file}`));
-        card.appendChild(thumb);
+        thumb.addEventListener('mouseenter', () => thumb.play());
+        thumb.addEventListener('mouseleave', () => {
+          thumb.pause();
+          thumb.currentTime = 0;
+        });
 
+        card.appendChild(thumb);
         grid.appendChild(card);
       }
     }

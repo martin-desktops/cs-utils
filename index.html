@@ -4,17 +4,40 @@
   <meta charset="UTF-8">
   <title>CS2 Utility Browser</title>
   <style>
-    body { font-family: sans-serif; margin: 2rem; background: #111; color: #eee; }
-    input { padding: 0.5rem; margin-bottom: 1rem; width: 100%; max-width: 300px; }
-    .map { margin-bottom: 2rem; }
-    video { max-width: 100%; display: block; margin-top: 0.5rem; }
-    h2 { margin-top: 1rem; border-bottom: 1px solid #444; padding-bottom: 0.2rem; }
+    body {
+      font-family: sans-serif;
+      margin: 2rem;
+      background: #111;
+      color: #eee;
+    }
+    select {
+      padding: 0.5rem;
+      margin-bottom: 2rem;
+      font-size: 1rem;
+      background: #222;
+      color: #eee;
+      border: 1px solid #444;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    video {
+      width: 100%;
+      border: 1px solid #333;
+      background: black;
+    }
   </style>
 </head>
 <body>
   <h1>CS2 Utility Browser</h1>
-  <input type="text" id="filter" placeholder="Filter maps... (e.g. inferno)">
-  <div id="content"></div>
+  <label for="mapSelect">Choose a map:</label>
+  <select id="mapSelect">
+    <option value="">-- Select a map --</option>
+  </select>
+
+  <div id="videoGrid" class="grid"></div>
 
   <script>
     async function loadManifest() {
@@ -22,41 +45,42 @@
       return res.json();
     }
 
-    function render(manifest) {
-      const container = document.getElementById('content');
-      const filterInput = document.getElementById('filter');
-
-      function applyFilter() {
-        const query = filterInput.value.toLowerCase();
-        container.innerHTML = '';
-        for (const [map, videos] of Object.entries(manifest)) {
-          if (!map.toLowerCase().includes(query)) continue;
-
-          const section = document.createElement('div');
-          section.className = 'map';
-
-          const heading = document.createElement('h2');
-          heading.textContent = map;
-          section.appendChild(heading);
-
-          for (const video of videos) {
-            const videoEl = document.createElement('video');
-            videoEl.controls = true;
-            videoEl.src = `${map}/${video}`;
-            section.appendChild(videoEl);
-          }
-
-          container.appendChild(section);
-        }
+    function populateMapDropdown(manifest) {
+      const select = document.getElementById('mapSelect');
+      for (const map of Object.keys(manifest).sort()) {
+        const opt = document.createElement('option');
+        opt.value = map;
+        opt.textContent = map;
+        select.appendChild(opt);
       }
 
-      filterInput.addEventListener('input', applyFilter);
-      applyFilter();
+      select.addEventListener('change', () => {
+        const selectedMap = select.value;
+        renderVideos(manifest, selectedMap);
+      });
     }
 
-    loadManifest().then(render).catch(err => {
-      document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
-    });
+    function renderVideos(manifest, map) {
+      const grid = document.getElementById('videoGrid');
+      grid.innerHTML = '';
+      if (!map || !manifest[map]) return;
+
+      for (const file of manifest[map]) {
+        const vid = document.createElement('video');
+        vid.src = `${map}/${file}`;
+        vid.controls = true;
+        vid.autoplay = false;
+        grid.appendChild(vid);
+      }
+    }
+
+    loadManifest()
+      .then(manifest => {
+        populateMapDropdown(manifest);
+      })
+      .catch(err => {
+        document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
+      });
   </script>
 </body>
 </html>

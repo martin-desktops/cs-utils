@@ -17,20 +17,19 @@
       padding: 1rem;
     }
 
-    h1 {
+    h1#title {
       text-align: center;
       margin: 1rem 0;
+      cursor: pointer;
+      background-color: #444;
+      padding: 0.75rem 1.5rem;
+      border-radius: 0.5rem;
+      font-size: 1.5rem;
+      transition: background-color 0.2s ease;
     }
 
-    select {
-      padding: 0.5rem;
-      margin-bottom: 2rem;
-      font-size: 1rem;
-      background: #222;
-      color: #eee;
-      border: 1px solid #444;
-      width: 90%;
-      max-width: 400px;
+    h1#title:hover {
+      background-color: #555;
     }
 
     .grid {
@@ -80,10 +79,27 @@
       align-items: center;
       justify-content: center;
       z-index: 999;
+      flex-direction: column;
     }
 
     .modal.active {
       display: flex;
+    }
+
+    .modal-header {
+      width: 90vw;
+      max-width: 1280px;
+      display: flex;
+      justify-content: flex-start;
+      padding: 1rem 0 0.5rem 0;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: #eee;
+      font-size: 2rem;
+      cursor: pointer;
     }
 
     .modal .plyr {
@@ -93,68 +109,81 @@
       background: black;
     }
 
-    .modal-close {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: #444;
-      color: #eee;
-      border: none;
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      z-index: 1000;
-    }
-
     @media (max-width: 600px) {
       .card-title {
         font-size: 0.8rem;
+      }
+
+      .modal-header {
+        padding: 0.5rem 0 0.25rem 0;
+      }
+
+      .modal-close {
+        font-size: 1.5rem;
       }
     }
   </style>
 </head>
 <body>
-  <h1>CS2 Utility Browser</h1>
-  <label for="mapSelect">Choose a map:</label>
-  <select id="mapSelect">
-    <option value="">-- Select a map --</option>
-  </select>
+  <h1 id="title">CS2 Utility Browser</h1>
 
-  <div id="videoGrid" class="grid"></div>
+  <div id="mapGrid" class="grid"></div>
+  <div id="videoGrid" class="grid" style="display: none;"></div>
 
   <div id="modal" class="modal">
-    <button class="modal-close" onclick="closeModal()">Close</button>
+    <div class="modal-header">
+      <button class="modal-close" onclick="closeModal()">←</button>
+    </div>
     <video id="modalVideo" class="plyr" controls></video>
   </div>
 
   <script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
   <script>
-    let player;
+    let player, manifestData = {};
 
     async function loadManifest() {
       const res = await fetch('manifest.json');
-      return res.json();
+      manifestData = await res.json();
+      renderMapCards();
     }
 
-    function populateMapDropdown(manifest) {
-      const select = document.getElementById('mapSelect');
-      for (const map of Object.keys(manifest).sort()) {
-        const opt = document.createElement('option');
-        opt.value = map;
-        opt.textContent = map;
-        select.appendChild(opt);
-      }
+    function renderMapCards() {
+      const mapGrid = document.getElementById('mapGrid');
+      const videoGrid = document.getElementById('videoGrid');
+      mapGrid.innerHTML = '';
+      mapGrid.style.display = 'grid';
+      videoGrid.style.display = 'none';
 
-      select.addEventListener('change', () => {
-        renderVideos(manifest, select.value);
+      Object.keys(manifestData).sort().forEach(map => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.onclick = () => renderVideos(map);
+
+        const title = document.createElement('div');
+        title.className = 'card-title';
+        title.textContent = map;
+
+        const thumb = document.createElement('div');
+        thumb.className = 'thumb';
+        thumb.style.display = 'flex';
+        thumb.style.alignItems = 'center';
+        thumb.style.justifyContent = 'center';
+        thumb.textContent = '🗺️';
+
+        card.appendChild(title);
+        card.appendChild(thumb);
+        mapGrid.appendChild(card);
       });
     }
 
-    function renderVideos(manifest, map) {
-      const grid = document.getElementById('videoGrid');
-      grid.innerHTML = '';
-      if (!map || !manifest[map]) return;
+    function renderVideos(map) {
+      const videoGrid = document.getElementById('videoGrid');
+      const mapGrid = document.getElementById('mapGrid');
+      videoGrid.innerHTML = '';
+      mapGrid.style.display = 'none';
+      videoGrid.style.display = 'grid';
 
-      for (const file of manifest[map]) {
+      for (const file of manifestData[map]) {
         const card = document.createElement('div');
         card.className = 'card';
         card.onclick = () => openModal(`${map}/${file}`);
@@ -169,12 +198,10 @@
         thumb.muted = true;
         thumb.loop = true;
         thumb.playsInline = true;
-        thumb.autoplay = false; // Avoid autoplay policy issues
+        thumb.autoplay = false;
         thumb.controls = false;
 
-        thumb.addEventListener('mouseenter', () => {
-          thumb.play().catch(() => {});
-        });
+        thumb.addEventListener('mouseenter', () => thumb.play().catch(() => {}));
         thumb.addEventListener('mouseleave', () => {
           thumb.pause();
           thumb.currentTime = 0;
@@ -182,7 +209,7 @@
 
         card.appendChild(title);
         card.appendChild(thumb);
-        grid.appendChild(card);
+        videoGrid.appendChild(card);
       }
     }
 
@@ -213,11 +240,11 @@
       if (!playerEl.contains(e.target)) closeModal();
     });
 
-    loadManifest()
-      .then(populateMapDropdown)
-      .catch(err => {
-        document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
-      });
+    document.getElementById('title').addEventListener('click', renderMapCards);
+
+    loadManifest().catch(err => {
+      document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
+    });
   </script>
 </body>
 </html>

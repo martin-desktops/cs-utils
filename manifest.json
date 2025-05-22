@@ -1,31 +1,31 @@
 {
-  "ANCIENT": [
+  "de_ancient": [
     "DONUT SMOKE FROM CAVE.mp4",
     "CT FROM CAVE.mp4",
     "TEMPLE FROM CAVE.mp4"
   ],
-  "ANUBIS": [
-    "ebox molly from b main.mp4",
-    "mid smoke from t spawn.mp4",
-    "a molly + smoke from water.mp4",
-    "connector from t spawn.mp4",
-    "ct smoke from b main.mp4",
-    "left heaven molly from water.mp4",
+  "de_anubis": [
     "ebox smoke from stairs.mp4",
     "heaven smoke from upper.mp4",
-    "temple smoke from b main.mp4"
+    "mid smoke from t spawn.mp4",
+    "connector from t spawn.mp4",
+    "temple smoke from b main.mp4",
+    "a molly + smoke from water.mp4",
+    "ct smoke from b main.mp4",
+    "ebox molly from b main.mp4",
+    "left heaven molly from water.mp4"
   ],
-  "DUST2": [
+  "de_dust2": [
+    "ct smoke from xbox mid.mp4",
     "B TUNNEL FROM CT SPAWN.mp4",
-    "cross smoke from long.mp4",
-    "ct smoke from xbox mid.mp4"
+    "cross smoke from long.mp4"
   ],
-  "INFERNO": [
-    "long smoke from mid.mp4",
-    "pit smoke from long.mp4"
+  "de_inferno": [
+    "pit smoke from long.mp4",
+    "long smoke from mid.mp4"
   ],
-  "MIRAGE": [
-    "window smoke from t spawn.mp4",
-    "connector smoke from t spawn.mp4"
+  "de_mirage": [
+    "connector smoke from t spawn.mp4",
+    "window smoke from t spawn.mp4"
   ]
 }

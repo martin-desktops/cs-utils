@@ -10,6 +10,7 @@
       background: #111;
       color: #eee;
     }
+
     select {
       padding: 0.5rem;
       margin-bottom: 2rem;
@@ -18,15 +19,59 @@
       color: #eee;
       border: 1px solid #444;
     }
+
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       gap: 1rem;
     }
-    video {
-      width: 100%;
+
+    .card {
+      text-align: center;
+      background: #222;
+      padding: 0.5rem;
       border: 1px solid #333;
+    }
+
+    .card-title {
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .thumb {
+      width: 100%;
+      cursor: pointer;
+      display: block;
+      border: none;
       background: black;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal video {
+      width: 80%;
+      max-height: 80%;
+      background: black;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: #444;
+      color: #eee;
+      border: none;
+      padding: 0.5rem 1rem;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -38,6 +83,11 @@
   </select>
 
   <div id="videoGrid" class="grid"></div>
+
+  <div id="modal" class="modal" style="display:none;">
+    <button class="modal-close" onclick="closeModal()">Close</button>
+    <video id="modalVideo" controls></video>
+  </div>
 
   <script>
     async function loadManifest() {
@@ -66,12 +116,44 @@
       if (!map || !manifest[map]) return;
 
       for (const file of manifest[map]) {
-        const vid = document.createElement('video');
-        vid.src = `${map}/${file}`;
-        vid.controls = true;
-        vid.autoplay = false;
-        grid.appendChild(vid);
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const title = document.createElement('div');
+        title.className = 'card-title';
+        title.textContent = file.replace(/\.[^/.]+$/, "").toUpperCase();
+        card.appendChild(title);
+
+        const thumb = document.createElement('video');
+        thumb.src = `${map}/${file}`;
+        thumb.className = 'thumb';
+        thumb.muted = true;
+        thumb.loop = true;
+        thumb.playsInline = true;
+        thumb.autoplay = true;
+        thumb.controls = false;
+
+        thumb.addEventListener('click', () => openModal(`${map}/${file}`));
+        card.appendChild(thumb);
+
+        grid.appendChild(card);
       }
+    }
+
+    function openModal(src) {
+      const modal = document.getElementById('modal');
+      const video = document.getElementById('modalVideo');
+      video.src = src;
+      video.play();
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('modal');
+      const video = document.getElementById('modalVideo');
+      video.pause();
+      video.src = '';
+      modal.style.display = 'none';
     }
 
     loadManifest()

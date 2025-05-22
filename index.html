@@ -6,7 +6,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
-    /* existing styles unchanged */
     body {
       font-family: sans-serif;
       margin: 0;
@@ -320,10 +319,11 @@
         player.currentTime = Math.min(player.currentTime + SEEK_AMOUNT, player.duration || player.currentTime + SEEK_AMOUNT);
         e.preventDefault();
       } else if (e.key === 'f' || e.key === 'F') {
-        const videoContainer = document.getElementById('modalVideo').parentElement;
+        const fsEl = document.fullscreenElement;
+        const playerContainer = player.elements.container;
 
-        if (!document.fullscreenElement) {
-          videoContainer.requestFullscreen?.().catch(console.error);
+        if (!fsEl) {
+          playerContainer.requestFullscreen?.().catch(console.error);
         } else {
           document.exitFullscreen?.().catch(console.error);
         }

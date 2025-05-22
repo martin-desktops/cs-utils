@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>CS2 Utility Browser</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
   <style>
     body {
@@ -51,6 +51,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      transition: transform 0.1s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.01);
     }
 
     .card-title {
@@ -62,23 +67,29 @@
 
     .thumb {
       width: 100%;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
       background: black;
-      pointer-events: none;
     }
 
     .modal {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       background: rgba(0,0,0,0.9);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 999;
     }
 
+    .modal.active {
+      display: flex;
+    }
+
     .modal .plyr {
       width: 90vw;
-      max-height: 80vh;
+      max-width: 1280px;
+      aspect-ratio: 16 / 9;
       background: black;
     }
 
@@ -110,7 +121,7 @@
 
   <div id="videoGrid" class="grid"></div>
 
-  <div id="modal" class="modal" style="display:none;">
+  <div id="modal" class="modal">
     <button class="modal-close" onclick="closeModal()">Close</button>
     <video id="modalVideo" class="plyr" controls></video>
   </div>
@@ -134,8 +145,7 @@
       }
 
       select.addEventListener('change', () => {
-        const selectedMap = select.value;
-        renderVideos(manifest, selectedMap);
+        renderVideos(manifest, select.value);
       });
     }
 
@@ -159,9 +169,12 @@
         thumb.muted = true;
         thumb.loop = true;
         thumb.playsInline = true;
+        thumb.autoplay = false; // Avoid autoplay policy issues
         thumb.controls = false;
 
-        thumb.addEventListener('mouseenter', () => thumb.play());
+        thumb.addEventListener('mouseenter', () => {
+          thumb.play().catch(() => {});
+        });
         thumb.addEventListener('mouseleave', () => {
           thumb.pause();
           thumb.currentTime = 0;
@@ -177,36 +190,31 @@
       const modal = document.getElementById('modal');
       const video = document.getElementById('modalVideo');
 
-      if (player) {
-        player.source = {
-          type: 'video',
-          sources: [{ src, type: 'video/mp4' }]
-        };
-      } else {
+      if (!player) {
         player = new Plyr(video, { autoplay: true });
-        player.source = {
-          type: 'video',
-          sources: [{ src, type: 'video/mp4' }]
-        };
       }
 
-      modal.style.display = 'flex';
+      player.source = {
+        type: 'video',
+        sources: [{ src, type: 'video/mp4' }]
+      };
+
+      modal.classList.add('active');
     }
 
     function closeModal() {
       const modal = document.getElementById('modal');
       if (player) player.stop();
-      modal.style.display = 'none';
+      modal.classList.remove('active');
     }
 
-    // Close modal if clicking outside the player
     document.getElementById('modal').addEventListener('click', (e) => {
       const playerEl = document.querySelector('.plyr');
       if (!playerEl.contains(e.target)) closeModal();
     });
 
     loadManifest()
-      .then(manifest => populateMapDropdown(manifest))
+      .then(populateMapDropdown)
       .catch(err => {
         document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
       });

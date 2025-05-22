@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Manifest Generator</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: #111; color: #eee; }
+    button { padding: 1rem; font-size: 1rem; margin-top: 1rem; }
+    pre { background: #222; padding: 1rem; border-radius: 4px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>Generate manifest.json</h1>
+  <p>Select your repo folder (containing map directories with .mp4 files).</p>
+  <button onclick="generate()">Select Folder & Generate</button>
+  <pre id="output"></pre>
+
+  <script>
+    async function generate() {
+      const output = document.getElementById('output');
+      try {
+        const dirHandle = await window.showDirectoryPicker();
+        const manifest = {};
+
+        for await (const [name, handle] of dirHandle.entries()) {
+          if (handle.kind === 'directory') {
+            const videoFiles = [];
+            for await (const [fname, fhandle] of handle.entries()) {
+              if (fhandle.kind === 'file' && fname.toLowerCase().endsWith('.mp4')) {
+                videoFiles.push(fname);
+              }
+            }
+            if (videoFiles.length) {
+              manifest[name] = videoFiles;
+            }
+          }
+        }
+
+        const json = JSON.stringify(manifest, null, 2);
+        output.textContent = json;
+
+        // Save to disk
+        const saveHandle = await dirHandle.getFileHandle('manifest.json', { create: true });
+        const writable = await saveHandle.createWritable();
+        await writable.write(json);
+        await writable.close();
+
+        alert('✅ manifest.json saved to root of selected folder!');
+      } catch (e) {
+        output.textContent = `❌ Error: ${e.message}`;
+      }
+    }
+  </script>
+</body>
+</html>

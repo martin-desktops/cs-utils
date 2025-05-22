@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CS2 Utility Browser</title>
+  <style>
+    body { font-family: sans-serif; margin: 2rem; background: #111; color: #eee; }
+    input { padding: 0.5rem; margin-bottom: 1rem; width: 100%; max-width: 300px; }
+    .map { margin-bottom: 2rem; }
+    video { max-width: 100%; display: block; margin-top: 0.5rem; }
+    h2 { margin-top: 1rem; border-bottom: 1px solid #444; padding-bottom: 0.2rem; }
+  </style>
+</head>
+<body>
+  <h1>CS2 Utility Browser</h1>
+  <input type="text" id="filter" placeholder="Filter maps... (e.g. inferno)">
+  <div id="content"></div>
+
+  <script>
+    async function loadManifest() {
+      const res = await fetch('manifest.json');
+      return res.json();
+    }
+
+    function render(manifest) {
+      const container = document.getElementById('content');
+      const filterInput = document.getElementById('filter');
+
+      function applyFilter() {
+        const query = filterInput.value.toLowerCase();
+        container.innerHTML = '';
+        for (const [map, videos] of Object.entries(manifest)) {
+          if (!map.toLowerCase().includes(query)) continue;
+
+          const section = document.createElement('div');
+          section.className = 'map';
+
+          const heading = document.createElement('h2');
+          heading.textContent = map;
+          section.appendChild(heading);
+
+          for (const video of videos) {
+            const videoEl = document.createElement('video');
+            videoEl.controls = true;
+            videoEl.src = `${map}/${video}`;
+            section.appendChild(videoEl);
+          }
+
+          container.appendChild(section);
+        }
+      }
+
+      filterInput.addEventListener('input', applyFilter);
+      applyFilter();
+    }
+
+    loadManifest().then(render).catch(err => {
+      document.body.innerHTML = `<p>Error loading manifest.json: ${err.message}</p>`;
+    });
+  </script>
+</body>
+</html>

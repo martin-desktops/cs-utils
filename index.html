@@ -32,6 +32,12 @@
       background-color: #555;
     }
 
+    h2#mapLabel {
+      align-self: flex-start;
+      margin: 1rem 1rem 0 1rem;
+      font-size: 1.2rem;
+    }
+
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -51,7 +57,7 @@
       flex-direction: column;
       align-items: center;
       transition: transform 0.1s ease;
-      height: 280px;
+      height: 200px;
     }
 
     .card:hover {
@@ -74,8 +80,10 @@
     .thumb-container {
       position: relative;
       width: 100%;
-      aspect-ratio: 16 / 9;
+      flex-grow: 1;
       background: black;
+      overflow: hidden;
+      border-radius: 4px;
     }
 
     .thumb {
@@ -160,6 +168,7 @@
 <body>
   <h1 id="title">CS2 Utility Browser</h1>
 
+  <h2 id="mapLabel">Choose map</h2>
   <div id="mapGrid" class="grid"></div>
   <div id="videoGrid" class="grid" style="display: none;"></div>
 
@@ -194,7 +203,7 @@
 
         const title = document.createElement('div');
         title.className = 'card-title';
-        title.textContent = map;
+        title.textContent = map + ' MAP';
 
         const thumbContainer = document.createElement('div');
         thumbContainer.className = 'thumb-container';
